@@ -2,6 +2,7 @@
 # Author: Mohamed
 # Description: A password generator
 
+max_count = 1000000
 
 class PassGen:
 
@@ -23,27 +24,29 @@ class PassGen:
         answers['nickname'] = self.prompt('Enter {}\'s nick name: '.format(target))
 
         while True:
-            bday = self.prompt('Enter {}\'s birthday (mm-dd-yyyy): '.format(target))
+            bday = self.prompt('Enter {}\'s birthday (dd.mm.yyyy): '.format(target))
 
             if not len(bday.strip()):
                 break
 
-            if len(bday.split('-')) != 3:
+            if len(bday.split('.')) != 3:
                 print('Invalid birthday format\n')
                 continue
             
-            for _ in bday.split('-'):
+            for _ in bday.split('.'):
                 if not _.isdigit():
                     print('Birthday only requires numbers\n')
                     continue
             
-            mm, dd, yyyy = bday.split('-')
+            dd, mm, yyyy = bday.split('.')
             
-            if int(mm) > 12 or int(dd) > 31 or len(yyyy) != 4:
+            if int(mm) > 12 or int(mm) < 1 \
+            or int(dd) > 31 or int(dd) < 1 \
+            or len(yyyy) != 4:
                 print('Invalid birthday\n')
                 continue
             
-            bday = { 'month': int(mm), 'day': int(dd), 'year': int(yyyy) }
+            bday = { 'day': dd, 'month': mm, 'year': int(yyyy) }
             break 
             
         answers['birthday'] = bday
@@ -57,6 +60,7 @@ class PassGen:
 
     def format_names(self):                        
         for _ in range(1000):
+            print(f'Generated: {len(self.passwords)}')
 
             iters = 0
             for data in [self.target, self.spouse, self.child, self.pet]:
@@ -95,11 +99,22 @@ class PassGen:
                         bday = data['birthday']
 
                         if bday:
-                            d, e, f, g = (
+                            d, e, f, g, h, i, j, k, l, m, n, o, p, q = (
                                 '{}{}'.format(word, bday['year']),
                                 '{}{}'.format(bday['year'], word),
-                                '{}{}{}{}'.format(word, bday['month'], bday['day'], bday['year']),
-                                '{}{}{}{}'.format(word, bday['day'], bday['month'], bday['year'])
+                                '{}{}{}{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}{}.{}.{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}{}{}{}'.format(bday['day'], bday['month'], bday['year'], word),
+                                '{}.{}.{}{}'.format(bday['day'], bday['month'], bday['year'], word),
+                                '{}_{}{}{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}_{}.{}.{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}{}{}_{}'.format(bday['day'], bday['month'], bday['year'], word),
+                                '{}.{}.{}_{}'.format(bday['day'], bday['month'], bday['year'], word),                                
+                                '{}-{}{}{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}-{}.{}.{}'.format(word, bday['day'], bday['month'], bday['year']),
+                                '{}{}{}-{}'.format(bday['day'], bday['month'], bday['year'], word),
+                                '{}.{}.{}-{}'.format(bday['day'], bday['month'], bday['year'], word),
+
                             )
 
                             if not d in self.passwords:
@@ -112,7 +127,37 @@ class PassGen:
                                 self.passwords.append(f)
 
                             if not g in self.passwords:
-                                self.passwords.append(g)      
+                                self.passwords.append(g)   
+   
+                            if not h in self.passwords:
+                                self.passwords.append(h)
+      
+                            if not i in self.passwords:
+                                self.passwords.append(i)
+                            
+                            if not j in self.passwords:
+                                self.passwords.append(j)
+                            
+                            if not k in self.passwords:
+                                self.passwords.append(k)
+
+                            if not l in self.passwords:
+                                self.passwords.append(l)   
+   
+                            if not m in self.passwords:
+                                self.passwords.append(m)
+
+                            if not n in self.passwords:
+                                self.passwords.append(n)
+                            
+                            if not o in self.passwords:
+                                self.passwords.append(o)
+                            
+                            if not p in self.passwords:
+                                self.passwords.append(p)
+
+                            if not q in self.passwords:
+                                self.passwords.append(q)     
         
     def generator(self):
         self.target = self.question('target')  
@@ -126,17 +171,31 @@ class PassGen:
 
         self.pet = self.question('pet')
         print('\n')
-        
+
+        print('Generating... \nIt\'s may take a while.')
+
         self.format_names()
 
         output_file = '{}.txt'.format(self.target['firstname'].lower()
                              if self.target['firstname'] else 'pass.txt')
-        
+
         with open(output_file, 'wt') as f:
             for pwd in self.passwords:
+                print('Writing ...')
                 f.write('{}\n'.format(pwd))
 
-        print('Passwords Generated: {}'. format(len(self.passwords)))
+        with open(output_file, 'at') as f:
+            i = 0
+            while(i < max_count):
+                print('Writing additional combinations ... {}/{}'.format(i*3, max_count*3))
+                f.write('{}{}\n'.format(self.target['firstname'], i))
+                f.write('{}{}\n'.format(self.target['lastname'], i))
+                f.write('{}{}\n'.format(self.target['nickname'], i))
+                i += 1
+
+        print('Passwords Generated.')
+
+        quit()
 
 if __name__ == '__main__':
     PassGen().generator()
