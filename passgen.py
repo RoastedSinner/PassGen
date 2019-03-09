@@ -212,7 +212,7 @@ class PassGen:
 
 
 def parseCmdArgs(argv):
-    parser = argparse.ArgumentParser(description='Run TraceAir Photoscan Automation')
+    parser = argparse.ArgumentParser(description='Run password generator')
     parser.add_argument('--ignore-additional', dest='ignore_additional', action='store_true',
                         help='ignore additions combinations')
     parser.add_argument('--max-count', dest='max_count', default=max_count_default,
