@@ -3,17 +3,23 @@
 # Some changed by: UnderMind0x41
 # Description: A social engineering password generator
 # This script required python version >= 3.0
+import argparse
+import sys
 
-max_count = 1000000
+max_count_default = 1000000
+max_count_main_default = 1000
 
 class PassGen:
 
-    def __init__(self):
+    def __init__(self, max_count=max_count_default, max_count_main=max_count_main_default, silent=False):
         self.pet = None
         self.child = None
         self.spouse = None
-        self.target = None 
+        self.target = None
         self.passwords = []
+        self.silent = silent
+        self.max_count = max_count
+        self.max_count_main = max_count_main
     
     def prompt(self, txt):
         return str(input(txt))
@@ -60,9 +66,10 @@ class PassGen:
     def fullname(self, fname, lname):
         return ['{}{}'.format(a, b) for a in self.cases(fname) for b in self.cases(lname)]
 
-    def format_names(self):                        
-        for _ in range(1000):
-            print(f'Generated: {len(self.passwords)}')
+    def format_names(self):
+        for _ in range(self.max_count_main):
+            if not self.silent:
+                print(f'Generated: {len(self.passwords)}')
 
             iters = 0
             for data in [self.target, self.spouse, self.child, self.pet]:
@@ -161,7 +168,7 @@ class PassGen:
                             if not q in self.passwords:
                                 self.passwords.append(q)     
         
-    def generator(self):
+    def generator(self, ignore_additional = True):
         self.target = self.question('target')  
         print('\n')
 
@@ -174,30 +181,54 @@ class PassGen:
         self.pet = self.question('pet')
         print('\n')
 
-        print('Generating... \nIt\'s may take a while.')
-
+        print('Generating main passwords... \nIt\'s may take a while.')
         self.format_names()
+        if self.silent:
+            print("...generated {} passwords".format(len(self.passwords)))
 
         output_file = '{}.txt'.format(self.target['firstname'].lower()
                              if self.target['firstname'] else 'pass.txt')
 
         with open(output_file, 'wt') as f:
             for pwd in self.passwords:
-                print('Writing ...')
+                if not self.silent:
+                    print('Writing ...')
                 f.write('{}\n'.format(pwd))
 
-        with open(output_file, 'at') as f:
-            i = 0
-            while(i < max_count):
-                print('Writing additional combinations ... {}/{}'.format(i*3, max_count*3))
-                f.write('{}{}\n'.format(self.target['firstname'], i))
-                f.write('{}{}\n'.format(self.target['lastname'], i))
-                f.write('{}{}\n'.format(self.target['nickname'], i))
-                i += 1
+        if not ignore_additional:
+            print("Generating additionals passwords...")
+            with open(output_file, 'at') as f:
+                i = 0
+                while(i < self.max_count):
+                    if not self.silent:
+                        print('Writing additional combinations ... {}/{}'.format(i*3, self.max_count*3))
+                    f.write('{}{}\n'.format(self.target['firstname'], i))
+                    f.write('{}{}\n'.format(self.target['lastname'], i))
+                    f.write('{}{}\n'.format(self.target['nickname'], i))
+                    i += 1
 
-        print('Passwords Generated.')
-
+        print('Passwords Generated in file: {}'.format(output_file))
         quit()
 
+
+def parseCmdArgs(argv):
+    parser = argparse.ArgumentParser(description='Run TraceAir Photoscan Automation')
+    parser.add_argument('--ignore-additional', dest='ignore_additional', action='store_true',
+                        help='ignore additions combinations')
+    parser.add_argument('--max-count', dest='max_count', default=max_count_default,
+                        help='maximum count for additional combinations')
+    parser.add_argument('--max-count-main', dest='max_count_main', default=max_count_main_default,
+                        help='maximum count for main combinations')
+    parser.add_argument('--silent', dest='silent', action='store_true',
+                        help='no print process (faster)')
+    parser.set_defaults(ignore_additional=False)
+    parser.set_defaults(silent=False)
+    args = parser.parse_args(argv[1:])
+    return args
+
 if __name__ == '__main__':
-    PassGen().generator()
+    args = parseCmdArgs(sys.argv)
+    PassGen(max_count=int(args.max_count),
+            max_count_main=int(args.max_count_main),
+            silent=args.silent
+            ).generator(ignore_additional=args.ignore_additional)
