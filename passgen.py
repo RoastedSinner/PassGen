@@ -184,7 +184,7 @@ class PassGen:
         print('Generating main passwords... \nIt\'s may take a while.')
         self.format_names()
         if self.silent:
-            print("...generated {} passwords".format(len(self.passwords)))
+            print("...generated {} main passwords".format(len(self.passwords)))
 
         output_file = '{}.txt'.format(self.target['firstname'].lower()
                              if self.target['firstname'] else 'pass.txt')
@@ -196,7 +196,7 @@ class PassGen:
                 f.write('{}\n'.format(pwd))
 
         if not ignore_additional:
-            print("Generating additionals passwords...")
+            print("Generating additionals combinations...")
             with open(output_file, 'at') as f:
                 i = 0
                 while(i < self.max_count):
@@ -206,6 +206,8 @@ class PassGen:
                     f.write('{}{}\n'.format(self.target['lastname'], i))
                     f.write('{}{}\n'.format(self.target['nickname'], i))
                     i += 1
+            if self.silent:
+                print("...generated {} additional combinations".format(self.max_count*3))
 
         print('Passwords Generated in file: {}'.format(output_file))
         quit()
